@@ -15,7 +15,8 @@ var timerLoop
 
 const speedGame = 200
 
-const walls = false //Define se a cobra tentar atravessar a borda é considerado derrota
+const walls = true //Define se a cobra tentar atravessar a borda é considerado derrota
+const startLengthSnake = 5
 
 let guy = []
 
@@ -23,7 +24,7 @@ let indexFruit;
 
 const snake = {
     indexHead: 0,
-    length: 5,
+    length: startLengthSnake,
     state: 'none',
     switchMoviment(key){
         if(key==='w' && this.state!=='down')
@@ -46,7 +47,6 @@ function start(){
     renderDisplay()
 
     startGame()
-
     timerLoop = setInterval(loop,speedGame)
 
 }
@@ -63,6 +63,14 @@ function startGame(){
 
 }
 
+function restartGame(){
+    estructure()
+    renderDisplay()
+
+    startGame()
+    timerLoop = setInterval(loop,speedGame)
+}
+
 function loop(){
     eatFruit()
     renderDisplay()
@@ -73,8 +81,10 @@ function loop(){
 function eatFruit(){
     if(snake.state!=='none'){
 
-        if(walls==true && borderCollapse()!==false)
-            endGame()
+        if(walls==true && borderCollapse()!==false){
+            endGame() //Mesmo encerrando o setInterval, ele ainda executada o resto da função
+            return //Logo... deve-se impedir que isso ocorra
+        }
 
         let nextIndex
         
@@ -133,7 +143,7 @@ function borderCollapse(){
     }
 
     
-    const headSnakeIsInBorder = border => border.filter(c => c==snake.indexHead).length
+    const headSnakeIsInBorder = border => border.filter(border => border==snake.indexHead).length
 
     if(snake.state=='up' && headSnakeIsInBorder(rowUp)){
         return 'up'
@@ -210,10 +220,21 @@ function renderDisplay(){
       document.querySelector('#canvas').innerHTML = html 
 }
 
-function endGame(){
+function endGame(butaoClicado){
     //Função para quando o jogador perder
-    //alert('Você perdeu!')
     clearInterval(timerLoop)
+    let botaoRestart = '<button onclick="endGame(true)">RESTART</button>'
+
+    if(butaoClicado){
+        restartGame()
+        snake.state = 'none'
+        snake.length = startLengthSnake
+        document.getElementsByTagName('body')[0].innerHTML = document.getElementsByTagName('body')[0].innerHTML.replace(botaoRestart, '')
+        console.log('EndGame\n')
+        return
+    } else{
+        document.getElementsByTagName('body')[0].innerHTML += botaoRestart
+    }
 }
 
 start()

@@ -15,7 +15,7 @@ var timerLoop
 
 const speedGame = 200
 
-const walls = true //Define se a cobra tentar atravessar a borda é considerado derrota
+const walls = false //Define se a cobra tentar atravessar a borda é considerado derrota
 const startLengthSnake = 5
 
 let guy = []
@@ -56,7 +56,6 @@ function startGame(){
 
     snake.indexHead = indexPixelInicio
     guy[indexPixelInicio] = snake.length
-    console.log(indexPixelInicio)
 
     renderDisplay()
     fruitSpawn()
@@ -81,7 +80,9 @@ function loop(){
 function eatFruit(){
     if(snake.state!=='none'){
 
-        if(walls==true && borderCollapse()!==false){
+        const willCollapseWall = borderCollapse()
+
+        if(walls==true && willCollapseWall!==false){
             endGame() //Mesmo encerrando o setInterval, ele ainda executada o resto da função
             return //Logo... deve-se impedir que isso ocorra
         }
@@ -89,19 +90,19 @@ function eatFruit(){
         let nextIndex
         
         if(snake.state==='up'){
-            nextIndex = nextIndex = borderCollapse()==='up' 
+            nextIndex = willCollapseWall==='up' 
                 ? (snake.indexHead+((heightDisplay-1)*widthDisplay)) : snake.indexHead - widthDisplay
         }
         if(snake.state==='down'){
-            nextIndex = nextIndex = borderCollapse()==='down' 
+            nextIndex = willCollapseWall==='down' 
                 ? (snake.indexHead-((heightDisplay-1)*widthDisplay)) : snake.indexHead + widthDisplay
         }
         if(snake.state==='left'){
-            nextIndex = borderCollapse()==='left' 
+            nextIndex = willCollapseWall==='left' 
                 ? (snake.indexHead+widthDisplay)-1 : snake.indexHead - 1
         }
         if(snake.state==='right'){
-            nextIndex = borderCollapse()==='right' 
+            nextIndex = willCollapseWall==='right' 
                 ? (snake.indexHead-widthDisplay)+1 : snake.indexHead + 1
         }
 
@@ -201,10 +202,10 @@ function renderDisplay(){
 
             //const stylePixel = guy[pixelIndex]<0 ? colors[2] : () => { if(guy[pixelIndex===0]){return colors[1]}else{return colors[0]}}
 
-            html += "<td style= background-color:" + stylePixel() + ";>"
-            html += "<div class='index'>"+pixelIndex+"</div>"
-            html += "<div >"+pixel+"</div>"
-            html += '</td>'
+            html += `<td style= background-color:${stylePixel()};>`
+            html += `<div class='index'>${pixelIndex}</div>`
+            html += `<div >${pixel}</div>`
+            html += `</td>`
 
             /*html += '<td>'
             html += "<div class='index'>"+pixelIndex+"</div>"
@@ -226,11 +227,11 @@ function endGame(butaoClicado){
     let botaoRestart = '<button onclick="endGame(true)">RESTART</button>'
 
     if(butaoClicado){
-        restartGame()
         snake.state = 'none'
         snake.length = startLengthSnake
         document.getElementsByTagName('body')[0].innerHTML = document.getElementsByTagName('body')[0].innerHTML.replace(botaoRestart, '')
         console.log('EndGame\n')
+        restartGame()
         return
     } else{
         document.getElementsByTagName('body')[0].innerHTML += botaoRestart
